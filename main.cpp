@@ -36,9 +36,8 @@ void solvesud(){
     sudoku sud;
     std::cout<<"请输入数独(空格分隔列,换行分割行,无需区分宫,空格子用0表示):\n";
     sud.input();
-    std::cout<<"正在解数独,请稍等...(若有多个解,仅随机出一个)\n";
-    if(sud.solve()) std::cout<<"数独无解!";
-    else std::cout<<"数独的解为:\n",sud.print();
+    std::cout<<"正在解数独,请稍等...\n";
+    if(sud.solve(1)) std::cout<<"数独无解!\n";
     std::cout<<"按任意键继续...\n";
 }
 int main(){

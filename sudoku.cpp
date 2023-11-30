@@ -50,7 +50,7 @@ bool sudoku::check(const int &x,const int &y,const int &a)const{
             if((i!=x||j!=y)&&g[i][j]==a) return 0;
     return 1;
 }
-bool sudoku::solve(){
+bool sudoku::gensolve(){
     for(int i=0;i<9;i++)
         for(int j=0;j<9;j++)
             if(!g[i][j]){
@@ -60,7 +60,7 @@ bool sudoku::solve(){
                 while(!n.empty()){
                     int v=randn(0,n.size()-1);
                     g[i][j]=n[v];
-                    if(solve()) return 1;
+                    if(gensolve()) return 1;
                     g[i][j]=0;
                     n.erase(n.begin()+v);
                 }
@@ -68,35 +68,38 @@ bool sudoku::solve(){
             }
     return 1;
 }
-void sudoku::multi_(const int &x,const int &y,int &sum){
-    int mn=10,mx=0,my=0,tn=0,ma[10],cnt[10];
+void sudoku::solve_(const int &x,const int &y){
+    int mn=10,mx=0,my=0,ma[10];
     for(int i=0;i<9;i++)
         for(int j=0;j<9;j++)
             if(!g[i][j]){
-                memset(cnt,0,sizeof(cnt));
+                int cnt[10]{},tn=0;
                 for(int k=0;k<9;k++) cnt[g[i][k]]++,cnt[g[k][i]]++;
                 for(int k=i/3*3,kl=k+3;k<kl;k++)
                     for(int l=j/3*3,ll=l+3;l<ll;l++) cnt[g[k][l]]++;
-                tn=0;
-                for(auto &p:cnt)
-                    if(!p) tn++;
+                for(int k=1;k<10;k++)
+                    if(!cnt[k]) tn++;
                 if(!tn){g[x][y]=0;return;}
                 if(tn<mn){
                     mn=tn,mx=i,my=j;
                     memcpy(ma+1,cnt+1,sizeof(cnt)-sizeof(int));
                 }
             }
-    if(mn==10){sum++;g[x][y]=0;return;}
+    if(mn==10){
+        sum++;
+        if(prnt) print(*ps),*ps<<'\n';
+        g[x][y]=0;return;
+    }
     for(int i=1;i<10;i++)
         if(!ma[i]){
             g[mx][my]=i;
-            multi_(mx,my,sum);
+            solve_(mx,my);
         }
     g[x][y]=0;return;
 }
 sudoku sudoku::generate(int n){
     clear();
-    solve();
+    gensolve();
     auto res=*this;
     std::vector<pos> np;
     for(int i=0;i<9;i++)
@@ -105,7 +108,7 @@ sudoku sudoku::generate(int n){
     while(n--){
         const int v=randn(0,np.size()-1),t=g[np[v].x][np[v].y];
         g[np[v].x][np[v].y]=0;
-        if(multi()) g[np[v].x][np[v].y]=t;
+        if(!solve(0)) g[np[v].x][np[v].y]=t;
         else np.erase(np.begin()+v);
     }
     return res;
